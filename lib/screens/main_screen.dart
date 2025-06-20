@@ -1,5 +1,6 @@
 // main_screen.dart - Page principale avec statistiques
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -67,7 +68,9 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  void _handleLogout(BuildContext context) {
+  Future<void> _handleLogout(BuildContext context) async {
+    final storage = const FlutterSecureStorage();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -89,7 +92,11 @@ class MainScreen extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              // Clear the token without worrying about widget state
+              await storage.delete(key: 'token');
+
+              // Force navigation even if widget is disposed
               Navigator.pop(context); // Close dialog
               Navigator.pushReplacementNamed(context, '/auth');
             },
@@ -101,9 +108,7 @@ class MainScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _buildStatsSection() {
+  }  Widget _buildStatsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

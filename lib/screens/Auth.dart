@@ -1,7 +1,9 @@
 // lib/screens/auth_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/sign_in_form.dart';
 import '../widgets/sign_up_form.dart';
+import '../api_service.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -16,11 +18,14 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  final GlobalKey<FormState> _signInFormKey = GlobalKey<FormState>();
+  final AuthService _authService = AuthService();
+  final _storage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill email for demo
+    // Pre-fill email for demo (remove in production)
     emailController.text = 'lh_dehili@esi.dz';
     usernameController.text = 'lh_dehili@esi.dz';
   }
@@ -34,10 +39,10 @@ class _AuthScreenState extends State<AuthScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1E3A8A), // Deep blue
-              Color(0xFF3B82F6), // Medium blue
-              Color(0xFF8B5CF6), // Purple
-              Color(0xFFEC4899), // Pink
+              Color(0xFF1E3A8A),
+              Color(0xFF3B82F6),
+              Color(0xFF8B5CF6),
+              Color(0xFFEC4899),
             ],
             stops: [0.0, 0.3, 0.7, 1.0],
           ),
@@ -50,7 +55,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 constraints: const BoxConstraints(maxWidth: 400),
                 child: Card(
                   elevation: 20,
-                  color: const Color(0xFF1F2937), // Dark gray
+                  color: const Color(0xFF1F2937),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -102,6 +107,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             emailController: emailController,
                             passwordController: passwordController,
                             onSignIn: _handleSignIn,
+                            formKey: _signInFormKey,
                           )
                         else
                           SignUpForm(
@@ -214,56 +220,11 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  void _handleSignIn() {
-    // Show loading or success animation
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
-        ),
-      ),
-    );
-
-    // Simulate authentication delay
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pop(context); // Close loading dialog
-
-      // Navigate to main app
-      Navigator.pushReplacementNamed(context, '/main');
-    });
-  }
-
-  void _handleSignUp() {
-    if (passwordController.text != confirmPasswordController.text) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF1F2937),
-          title: const Text(
-            'Error',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: const Text(
-            'Passwords do not match',
-            style: TextStyle(color: Color(0xFF9CA3AF)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'OK',
-                style: TextStyle(color: Color(0xFF3B82F6)),
-              ),
-            ),
-          ],
-        ),
-      );
+  Future<void> _handleSignIn() async {
+    if (!_signInFormKey.currentState!.validate()) {
       return;
     }
 
-    // Show loading animation
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -274,13 +235,79 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
     );
 
-    // Simulate registration delay
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pop(context); // Close loading dialog
+    try {
+      await _authService.login(
+        username: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-      // Navigate to main app
+      if (!mounted) return;
+      Navigator.pop(context);
       Navigator.pushReplacementNamed(context, '/main');
-    });
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      _showErrorDialog('Login Failed', e.toString());
+    }
+  }
+
+  Future<void> _handleSignUp() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      _showErrorDialog('Error', 'Passwords do not match');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+        ),
+      ),
+    );
+
+    try {
+      await _authService.register(
+        username: usernameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      Navigator.pushReplacementNamed(context, '/main');
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      _showErrorDialog('Registration Failed', e.toString());
+    }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(color: Color(0xFF9CA3AF)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Color(0xFF3B82F6)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

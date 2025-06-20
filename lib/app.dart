@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../screens/Auth.dart';
 import '../screens/received_messages_screen.dart';
 import '../screens/send_message_screen.dart';
@@ -16,8 +17,26 @@ class SMSGatewayApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      // Set AuthScreen as the initial screen
-      home: const AuthScreen(),
+      // Use FutureBuilder to check token and decide initial screen
+      home: FutureBuilder(
+        future: const FlutterSecureStorage().read(key: 'token'),
+        builder: (context, snapshot) {
+          // Show loading indicator while checking token
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // If token exists, go to main screen
+          if (snapshot.hasData && snapshot.data != null) {
+            return const MainNavigation();
+          }
+
+          // Otherwise show auth screen
+          return const AuthScreen();
+        },
+      ),
       routes: {
         '/auth': (context) => const AuthScreen(),
         '/main': (context) => const MainNavigation(),
