@@ -20,6 +20,7 @@ class MainScreen extends StatelessWidget {
         title: const Text('SMS Center - Dashboard'),
         backgroundColor: const Color(0xFF1a1f2e),
         elevation: 0,
+        automaticallyImplyLeading: false, // Remove back button
         actions: [
           IconButton(
             icon: const Icon(Icons.brightness_6),
@@ -31,9 +32,7 @@ class MainScreen extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: (
-              
-            ) {},
+            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
@@ -64,6 +63,42 @@ class MainScreen extends StatelessWidget {
             _buildRecentActivitySection(),
           ],
         ),
+      ),
+    );
+  }
+
+  void _handleLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        title: const Text(
+          'Logout',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(color: Color(0xFF9CA3AF)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF9CA3AF)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pushReplacementNamed(context, '/auth');
+            },
+            child: const Text(
+              'Logout',
+              style: TextStyle(color: Color(0xFF3B82F6)),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -287,18 +322,3 @@ class MainScreen extends StatelessWidget {
     );
   }
 }
-
-// send_message_screen.dart - Écran d'envoi de messages
-
-
-// received_messages_screen.dart - Écran des messages reçus
-
-
-// sent_history_screen.dart - Écran de l'historique des messages envoyés
-
-// message_item.dart - Widget pour afficher un message
-
-// main_navigation.dart - Navigation principale avec BottomNavigationBar
-
-
-// app.dart - Configuration principale de l'application

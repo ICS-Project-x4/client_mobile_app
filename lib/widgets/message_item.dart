@@ -1,9 +1,10 @@
+// lib/widgets/message_item.dart
 import 'package:flutter/material.dart';
 
 class MessageItem extends StatelessWidget {
   final String phoneNumber;
   final String message;
-  final DateTime timestamp;
+  final String timestamp;
   final String? status;
   final bool isReceived;
 
@@ -18,76 +19,85 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
+      color: const Color(0xFF1a1f2e),
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1a1f2e),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                phoneNumber,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isReceived ? Icons.call_received : Icons.call_made,
+                      color: isReceived ? Colors.green : Colors.blue,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      phoneNumber,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Text(
-                _formatTimestamp(timestamp),
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: const TextStyle(color: Colors.white70),
-          ),
-          if (!isReceived && status != null) ...[
+                if (!isReceived && status != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(status!).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      status!,
+                      style: TextStyle(
+                        color: _getStatusColor(status!),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _getStatusColor(status!),
-                borderRadius: BorderRadius.circular(4),
+            Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
               ),
-              child: Text(
-                status!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              timestamp,
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 12,
               ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  String _formatTimestamp(DateTime timestamp) {
-    return '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
-  }
-
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'envoyé':
-      case 'sent':
+      case 'delivered':
+      case 'livré':
         return Colors.green;
-      case 'en attente':
       case 'pending':
+      case 'en attente':
         return Colors.orange;
-      case 'échec':
       case 'failed':
+      case 'échoué':
         return Colors.red;
       default:
         return Colors.grey;

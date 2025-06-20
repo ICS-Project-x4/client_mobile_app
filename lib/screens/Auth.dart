@@ -215,20 +215,24 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _handleSignIn() {
-    // Handle sign in logic here
+    // Show loading or success animation
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign In'),
-        content: Text('Signing in with: ${emailController.text}'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+        ),
       ),
     );
+
+    // Simulate authentication delay
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.pop(context); // Close loading dialog
+
+      // Navigate to main app
+      Navigator.pushReplacementNamed(context, '/main');
+    });
   }
 
   void _handleSignUp() {
@@ -236,12 +240,22 @@ class _AuthScreenState extends State<AuthScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Passwords do not match'),
+          backgroundColor: const Color(0xFF1F2937),
+          title: const Text(
+            'Error',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'Passwords do not match',
+            style: TextStyle(color: Color(0xFF9CA3AF)),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFF3B82F6)),
+              ),
             ),
           ],
         ),
@@ -249,20 +263,24 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    // Handle sign up logic here
+    // Show loading animation
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign Up'),
-        content: Text('Creating account for: ${usernameController.text}'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+        ),
       ),
     );
+
+    // Simulate registration delay
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.pop(context); // Close loading dialog
+
+      // Navigate to main app
+      Navigator.pushReplacementNamed(context, '/main');
+    });
   }
 
   @override
