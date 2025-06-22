@@ -80,7 +80,7 @@ class SIM {
 }
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.43.42:8000/api';
+  static const String baseUrl = 'http://192.168.95.143:8000/api';
   final _storage = const FlutterSecureStorage();
 
   Future<Map<String, String>> _getHeaders() async {
